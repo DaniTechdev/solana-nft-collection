@@ -1,7 +1,10 @@
 import {
   createNft,
   fetchDigitalAsset,
+  findMetadataPda,
   mplTokenMetadata,
+  verifyCollection,
+  verifyCollectionV1,
 } from "@metaplex-foundation/mpl-token-metadata";
 
 import {
@@ -14,6 +17,8 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
+import { Serializer } from "@metaplex-foundation/umi/serializers";
+import { base58 } from "@metaplex-foundation/umi/serializers";
 // import { web3JsRpc } from "@metaplex-foundation/umi-rpc-web3js";
 import {
   generateSigner,
@@ -53,9 +58,22 @@ umi.use(keypairIdentity(umiUser));
 
 console.log("Set up Umi instance for user");
 
+//collection address to check if other nft belongs to it
+const collectionAddress = publicKey(
+  "GHP4ghPiXXn4wMHeyp72yRuA16QCFq8YdHvrgnQW9NzT"
+);
+
 //get the nft address we want to verify if it belongs to a collection
 const nftAddress = publicKey("2igcir2Hd5rLkcxHjaeYGbbHkQDXR4kn7xZK1UyksH88");
 
 //verify
 
-const transaction = await verif;
+const transaction = await verifyCollectionV1(umi, {
+  metadata: findMetadataPda(umi, { mint: nftAddress }),
+  collectionMint: collectionAddress,
+  authority: umi.identity,
+}).sendAndConfirm(umi);
+
+const signature = base58.deserialize(transaction.signature);
+
+console.log(`https://explorer.solana.com/tx/${signature}?cluster=devnet`);
